@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do App</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Task Manager</h1>
+        
+        <form id="todo-form">
+            <input type="text" id="todo-input" placeholder="What needs to be done?" required>
+            <input type="date" id="date-input" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <div class="filters">
+            <button data-filter="all" class="active">All</button>
+            <button data-filter="completed">Completed</button>
+            <button data-filter="pending">Pending</button>
+        </div>
+
+        <ul id="todo-list"></ul>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

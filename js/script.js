@@ -1,58 +1,68 @@
+// 1. Inisialisasi Data
 let todos = [];
+let currentFilter = 'all';
 
-const form = document.getElementById('todo-form');
-const todoList = document.getElementById('todo-list');
+// 2. Fungsi untuk Menambah Tugas
+function addTodo() {
+    const input = document.getElementById('todoInput');
+    const taskText = input.value.trim();
+    
+    if (taskText !== "") {
+        const newTodo = {
+            id: Date.now(),
+            text: taskText,
+            completed: false
+        };
+        todos.push(newTodo);
+        input.value = "";
+        renderTodos();
+    }
+}
 
-// 1. Add Task
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const taskText = document.getElementById('todo-input').value;
-    const taskDate = document.getElementById('date-input').value;
+// 3. Fungsi untuk Menghapus Tugas (DELETE)
+function deleteTodo(id) {
+    // Memfilter array untuk membuang item dengan ID yang dipilih
+    todos = todos.filter(todo => todo.id !== id);
+    renderTodos();
+}
 
-    // Simple Validation
-    if (!taskText.trim() || !taskDate) return alert("Please fill all fields");
+// 4. Fungsi untuk Toggle Status Selesai
+function toggleTodo(id) {
+    todos = todos.map(todo => {
+        if (todo.id === id) {
+            return { ...todo, completed: !todo.completed };
+        }
+        return todo;
+    });
+    renderTodos();
+}
 
-    const newTodo = {
-        id: Date.now(),
-        text: taskText,
-        date: taskDate,
-        completed: false
-    };
+// 5. Fungsi untuk Mengatur Filter
+function setFilter(criteria) {
+    currentFilter = criteria;
+    renderTodos();
+}
 
-    todos.push(newTodo);
-    renderTodos(todos);
-    form.reset();
-});
+// 6. Fungsi Render (Menampilkan ke Layar)
+function renderTodos() {
+    const listElement = document.getElementById('todoList');
+    listElement.innerHTML = "";
 
-// 2. Render Function (The "Source of Truth")
-function renderTodos(data) {
-    todoList.innerHTML = '';
-    data.forEach(todo => {
+    // Logika Filter
+    const filteredTodos = todos.filter(todo => {
+        if (currentFilter === 'active') return !todo.completed;
+        if (currentFilter === 'completed') return todo.completed;
+        return true; // Default 'all'
+    });
+
+    filteredTodos.forEach(todo => {
         const li = document.createElement('li');
+        li.className = todo.completed ? 'completed' : '';
+        
         li.innerHTML = `
-            <span style="${todo.completed ? 'text-decoration: line-through' : ''}">
-                ${todo.text} - <small>${todo.date}</small>
-            </span>
-            <button onclick="deleteTodo(${todo.id})">Delete</button>
+            <span onclick="toggleTodo(${todo.id})">${todo.text}</span>
+            <button class="delete-btn" onclick="deleteTodo(${todo.id})">Hapus</button>
         `;
-        todoList.appendChild(li);
+        listElement.appendChild(li);
     });
 }
-
-// 3. Delete Task
-function deleteTodo(id) {
-    todos = todos.filter(t => t.id !== id);
-    renderTodos(todos);
-}
-
-// 4. Filter Logic
-document.querySelector('.filters').addEventListener('click', (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const filter = e.target.dataset.filter;
-    
-    let filtered = todos;
-    if (filter === 'completed') filtered = todos.filter(t => t.completed);
-    if (filter === 'pending') filtered = todos.filter(t => !t.completed);
-    
-    renderTodos(filtered);
-});

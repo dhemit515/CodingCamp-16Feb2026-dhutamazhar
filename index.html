@@ -3,214 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern To-Do List</title>
+    <title>To-Do List Filter Tanggal</title>
     <style>
-        /* CSS: Gaya Tampilan */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
-            padding: 50px;
+            padding: 20px;
         }
 
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
         }
 
-        h2 { text-align: center; color: #333; }
+        h2 { text-align: center; }
 
+        /* Form Input di Atas */
         .input-section {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             margin-bottom: 20px;
         }
 
+        .input-group {
+            display: flex;
+            gap: 5px;
+        }
+
         input[type="text"] {
-            flex: 1;
+            flex: 2;
             padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            outline: none;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
         input[type="date"] {
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            outline: none;
-            color: #555;
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
-        input[type="text"]:focus { border-color: #007bff; }
-
-        button.add-btn {
-            padding: 10px 15px;
+        .add-btn {
+            padding: 10px;
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
         }
 
+        /* Bagian Filter di Bawah Form */
         .filter-section {
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+            margin-bottom: 15px;
             display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .filter-section button {
-            background: #eee;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
+        .filter-section label {
+            font-size: 14px;
+            font-weight: bold;
         }
 
-        .filter-section button:hover { background: #ddd; }
-
+        /* Daftar Tugas */
         ul { list-style: none; padding: 0; }
 
         li {
             background: #fff;
-            border-bottom: 1px solid #eee;
-            padding: 12px;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.3s;
         }
 
-        li.completed span {
+        .completed span {
             text-decoration: line-through;
             color: #888;
         }
 
-        li span { cursor: pointer; flex: 1; }
-
         .delete-btn {
-            background-color: #ff4d4d;
+            background: #dc3545;
             color: white;
             border: none;
             padding: 5px 10px;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 0.75rem;
         }
-
-        .delete-btn:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>My Tasks</h2>
+    <h2>My To-Do List</h2>
 
     <div class="input-section">
-        <input type="text" id="todoInput" placeholder="Apa rencanamu?">
-        <input type="date" id="todoDate"> <button class="add-btn" onclick="addTodo()">Add</button>
+        <div class="input-group">
+            <input type="text" id="todoInput" placeholder="Nama tugas...">
+            <input type="date" id="todoDate">
+        </div>
+        <button class="add-btn" onclick="addTodo()">Tambah Tugas</button>
     </div>
 
     <div class="filter-section">
-        <button onclick="setFilter('all')">Semua</button>
-        <button onclick="setFilter('active')">Belum</button>
-        <button onclick="setFilter('completed')">Selesai</button>
+        <label>Filter Tanggal:</label>
+        <input type="date" id="filterDate" onchange="filterByDate(this.value)">
+        <button onclick="resetDateFilter()">Reset</button>
     </div>
 
     <ul id="todoList"></ul>
 </div>
 
-<div class="filter-section">
-    <button onclick="setFilter('all')">Semua</button>
-    <button onclick="setFilter('active')">Belum</button>
-    <button onclick="setFilter('completed')">Selesai</button>
-    
-    <input type="date" id="filterDate" onchange="filterByDate(this.value)" style="margin-left: 10px;">
-    <button onclick="resetDateFilter()">Reset Tgl</button>
-</div>
-
 <script>
-    /* JAVASCRIPT: Logika Aplikasi */
     let todos = [];
-    let currentFilter = 'all';
+    let dateFilter = null;
 
-    // Menambah Tugas Baru
-    function addTodo() {
-        const input = document.getElementById('todoInput');
-        const taskText = input.value.trim();
-        
-        if (taskText !== "") {
-            const newTodo = {
-                id: Date.now(), // ID Unik menggunakan timestamp
-                text: taskText,
-                completed: false
-            };
-            todos.push(newTodo);
-            input.value = "";
+    // Load data dari Local Storage
+    window.onload = () => {
+        const saved = localStorage.getItem('myTodoList');
+        if (saved) {
+            todos = JSON.parse(saved);
             renderTodos();
         }
+    };
+
+    function save() {
+        localStorage.setItem('myTodoList', JSON.stringify(todos));
     }
 
-    // Menghapus Tugas (Delete)
-    function deleteTodo(id) {
-        todos = todos.filter(todo => todo.id !== id);
+    function addTodo() {
+        const textInput = document.getElementById('todoInput');
+        const dateInput = document.getElementById('todoDate');
+        
+        if (textInput.value.trim() === "") {
+            alert("Isi nama tugas dulu ya!");
+            return;
+        }
+
+        const newTodo = {
+            id: Date.now(),
+            text: textInput.value,
+            date: dateInput.value || "Tanpa tanggal",
+            completed: false
+        };
+
+        todos.push(newTodo);
+        textInput.value = "";
+        dateInput.value = "";
+        save();
         renderTodos();
     }
 
-    // Menandai Selesai (Toggle)
     function toggleTodo(id) {
-        todos = todos.map(todo => {
-            if (todo.id === id) {
-                return { ...todo, completed: !todo.completed };
-            }
-            return todo;
-        });
+        todos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+        save();
         renderTodos();
     }
 
-    // Mengubah Filter
-    function setFilter(criteria) {
-        currentFilter = criteria;
+    function deleteTodo(id) {
+        todos = todos.filter(t => t.id !== id);
+        save();
         renderTodos();
     }
 
-    // Menampilkan List ke HTML
+    function filterByDate(val) {
+        dateFilter = val;
+        renderTodos();
+    }
+
+    function resetDateFilter() {
+        dateFilter = null;
+        document.getElementById('filterDate').value = "";
+        renderTodos();
+    }
+
     function renderTodos() {
-        const listElement = document.getElementById('todoList');
-        listElement.innerHTML = "";
+        const list = document.getElementById('todoList');
+        list.innerHTML = "";
 
-        // Filter data berdasarkan kriteria
-        const filteredTodos = todos.filter(todo => {
-            if (currentFilter === 'active') return !todo.completed;
-            if (currentFilter === 'completed') return todo.completed;
-            return true;
+        // Urutkan berdasarkan tanggal
+        let displayData = [...todos].sort((a, b) => {
+            if (a.date === "Tanpa tanggal") return 1;
+            if (b.date === "Tanpa tanggal") return -1;
+            return new Date(a.date) - new Date(b.date);
         });
 
-        filteredTodos.forEach(todo => {
+        // Filter jika ada tanggal yang dipilih
+        if (dateFilter) {
+            displayData = displayData.filter(t => t.date === dateFilter);
+        }
+
+        displayData.forEach(todo => {
             const li = document.createElement('li');
             if (todo.completed) li.classList.add('completed');
-            
+
             li.innerHTML = `
-                <span onclick="toggleTodo(${todo.id})">${todo.text}</span>
+                <div onclick="toggleTodo(${todo.id})" style="flex:1; cursor:pointer;">
+                    <strong>${todo.text}</strong><br>
+                    <small>Tanggal: ${todo.date}</small>
+                </div>
                 <button class="delete-btn" onclick="deleteTodo(${todo.id})">Hapus</button>
             `;
-            listElement.appendChild(li);
+            list.appendChild(li);
         });
     }
-
-    // Mendukung tombol "Enter" pada keyboard
-    document.getElementById('todoInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            addTodo();
-        }
-    });
 </script>
 
 </body>

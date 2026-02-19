@@ -1,8 +1,21 @@
-// 1. Inisialisasi Data
+/* JAVASCRIPT: Logika Aplikasi dengan Local Storage */
 let todos = [];
 let currentFilter = 'all';
 
-// 2. Fungsi untuk Menambah Tugas
+// 1. MUAT DATA SAAT HALAMAN DIBUKA (LOAD)
+window.onload = () => {
+    const savedTodos = localStorage.getItem('myTodoList');
+    if (savedTodos) {
+        todos = JSON.parse(savedTodos); // Mengubah string kembali jadi array
+        renderTodos();
+    }
+};
+
+// 2. SIMPAN DATA KE BROWSER (SAVE)
+function saveToLocalStorage() {
+    localStorage.setItem('myTodoList', JSON.stringify(todos)); // Simpan array sebagai string
+}
+
 function addTodo() {
     const input = document.getElementById('todoInput');
     const taskText = input.value.trim();
@@ -15,18 +28,17 @@ function addTodo() {
         };
         todos.push(newTodo);
         input.value = "";
+        saveToLocalStorage(); // Simpan setiap ada perubahan
         renderTodos();
     }
 }
 
-// 3. Fungsi untuk Menghapus Tugas (DELETE)
 function deleteTodo(id) {
-    // Memfilter array untuk membuang item dengan ID yang dipilih
     todos = todos.filter(todo => todo.id !== id);
+    saveToLocalStorage(); // Simpan setelah menghapus
     renderTodos();
 }
 
-// 4. Fungsi untuk Toggle Status Selesai
 function toggleTodo(id) {
     todos = todos.map(todo => {
         if (todo.id === id) {
@@ -34,30 +46,28 @@ function toggleTodo(id) {
         }
         return todo;
     });
+    saveToLocalStorage(); // Simpan setelah mengubah status
     renderTodos();
 }
 
-// 5. Fungsi untuk Mengatur Filter
 function setFilter(criteria) {
     currentFilter = criteria;
     renderTodos();
 }
 
-// 6. Fungsi Render (Menampilkan ke Layar)
 function renderTodos() {
     const listElement = document.getElementById('todoList');
     listElement.innerHTML = "";
 
-    // Logika Filter
     const filteredTodos = todos.filter(todo => {
         if (currentFilter === 'active') return !todo.completed;
         if (currentFilter === 'completed') return todo.completed;
-        return true; // Default 'all'
+        return true;
     });
 
     filteredTodos.forEach(todo => {
         const li = document.createElement('li');
-        li.className = todo.completed ? 'completed' : '';
+        if (todo.completed) li.classList.add('completed');
         
         li.innerHTML = `
             <span onclick="toggleTodo(${todo.id})">${todo.text}</span>
@@ -66,3 +76,9 @@ function renderTodos() {
         listElement.appendChild(li);
     });
 }
+
+document.getElementById('todoInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        addTodo();
+    }
+});

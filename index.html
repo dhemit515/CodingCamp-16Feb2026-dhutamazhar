@@ -1,30 +1,200 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My To-Do App</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Modern To-Do List</title>
+    <style>
+        /* CSS: Gaya Tampilan */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 50px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 { text-align: center; color: #333; }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        input[type="text"]:focus { border-color: #007bff; }
+
+        button.add-btn {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .filter-section button {
+            background: #eee;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .filter-section button:hover { background: #ddd; }
+
+        ul { list-style: none; padding: 0; }
+
+        li {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        li.completed span {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        li span { cursor: pointer; flex: 1; }
+
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .delete-btn:hover { background-color: #cc0000; }
+    </style>
 </head>
 <body>
-    <main class="container">
-        <h1>Task Manager</h1>
+
+<div class="container">
+    <h2>My Tasks</h2>
+
+    <div class="input-section">
+        <input type="text" id="todoInput" placeholder="Apa rencanamu hari ini?">
+        <button class="add-btn" onclick="addTodo()">Add</button>
+    </div>
+
+    <div class="filter-section">
+        <button onclick="setFilter('all')">Semua</button>
+        <button onclick="setFilter('active')">Belum</button>
+        <button onclick="setFilter('completed')">Selesai</button>
+    </div>
+
+    <ul id="todoList"></ul>
+</div>
+
+<script>
+    /* JAVASCRIPT: Logika Aplikasi */
+    let todos = [];
+    let currentFilter = 'all';
+
+    // Menambah Tugas Baru
+    function addTodo() {
+        const input = document.getElementById('todoInput');
+        const taskText = input.value.trim();
         
-        <form id="todo-form">
-            <input type="text" id="todo-input" placeholder="What needs to be done?" required>
-            <input type="date" id="date-input" required>
-            <button type="submit">Add Task</button>
-        </form>
+        if (taskText !== "") {
+            const newTodo = {
+                id: Date.now(), // ID Unik menggunakan timestamp
+                text: taskText,
+                completed: false
+            };
+            todos.push(newTodo);
+            input.value = "";
+            renderTodos();
+        }
+    }
 
-        <div class="filters">
-            <button data-filter="all" class="active">All</button>
-            <button data-filter="completed">Completed</button>
-            <button data-filter="pending">Pending</button>
-        </div>
+    // Menghapus Tugas (Delete)
+    function deleteTodo(id) {
+        todos = todos.filter(todo => todo.id !== id);
+        renderTodos();
+    }
 
-        <ul id="todo-list"></ul>
-    </main>
+    // Menandai Selesai (Toggle)
+    function toggleTodo(id) {
+        todos = todos.map(todo => {
+            if (todo.id === id) {
+                return { ...todo, completed: !todo.completed };
+            }
+            return todo;
+        });
+        renderTodos();
+    }
 
-    <script src="js/script.js"></script>
+    // Mengubah Filter
+    function setFilter(criteria) {
+        currentFilter = criteria;
+        renderTodos();
+    }
+
+    // Menampilkan List ke HTML
+    function renderTodos() {
+        const listElement = document.getElementById('todoList');
+        listElement.innerHTML = "";
+
+        // Filter data berdasarkan kriteria
+        const filteredTodos = todos.filter(todo => {
+            if (currentFilter === 'active') return !todo.completed;
+            if (currentFilter === 'completed') return todo.completed;
+            return true;
+        });
+
+        filteredTodos.forEach(todo => {
+            const li = document.createElement('li');
+            if (todo.completed) li.classList.add('completed');
+            
+            li.innerHTML = `
+                <span onclick="toggleTodo(${todo.id})">${todo.text}</span>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})">Hapus</button>
+            `;
+            listElement.appendChild(li);
+        });
+    }
+
+    // Mendukung tombol "Enter" pada keyboard
+    document.getElementById('todoInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            addTodo();
+        }
+    });
+</script>
+
 </body>
 </html>

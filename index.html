@@ -46,7 +46,7 @@
             outline: none;
             color: #555;
         }
-        
+
         input[type="text"]:focus { border-color: #007bff; }
 
         button.add-btn {
@@ -125,6 +125,15 @@
     </div>
 
     <ul id="todoList"></ul>
+</div>
+
+<div class="filter-section">
+    <button onclick="setFilter('all')">Semua</button>
+    <button onclick="setFilter('active')">Belum</button>
+    <button onclick="setFilter('completed')">Selesai</button>
+    
+    <input type="date" id="filterDate" onchange="filterByDate(this.value)" style="margin-left: 10px;">
+    <button onclick="resetDateFilter()">Reset Tgl</button>
 </div>
 
 <script>

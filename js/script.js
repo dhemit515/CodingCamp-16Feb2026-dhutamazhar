@@ -1,41 +1,43 @@
-/* JAVASCRIPT: Logika Aplikasi dengan Local Storage */
+/* JAVASCRIPT LENGKAP DENGAN TANGGAL */
 let todos = [];
 let currentFilter = 'all';
 
-// 1. MUAT DATA SAAT HALAMAN DIBUKA (LOAD)
 window.onload = () => {
     const savedTodos = localStorage.getItem('myTodoList');
     if (savedTodos) {
-        todos = JSON.parse(savedTodos); // Mengubah string kembali jadi array
+        todos = JSON.parse(savedTodos);
         renderTodos();
     }
 };
 
-// 2. SIMPAN DATA KE BROWSER (SAVE)
 function saveToLocalStorage() {
-    localStorage.setItem('myTodoList', JSON.stringify(todos)); // Simpan array sebagai string
+    localStorage.setItem('myTodoList', JSON.stringify(todos));
 }
 
 function addTodo() {
     const input = document.getElementById('todoInput');
+    const dateInput = document.getElementById('todoDate'); // Ambil element tanggal
     const taskText = input.value.trim();
+    const taskDate = dateInput.value; // Ambil nilai tanggal
     
     if (taskText !== "") {
         const newTodo = {
             id: Date.now(),
             text: taskText,
+            date: taskDate || "Tanpa tanggal", // Default jika tanggal kosong
             completed: false
         };
         todos.push(newTodo);
         input.value = "";
-        saveToLocalStorage(); // Simpan setiap ada perubahan
+        dateInput.value = ""; // Reset input tanggal
+        saveToLocalStorage();
         renderTodos();
     }
 }
 
 function deleteTodo(id) {
     todos = todos.filter(todo => todo.id !== id);
-    saveToLocalStorage(); // Simpan setelah menghapus
+    saveToLocalStorage();
     renderTodos();
 }
 
@@ -46,7 +48,7 @@ function toggleTodo(id) {
         }
         return todo;
     });
-    saveToLocalStorage(); // Simpan setelah mengubah status
+    saveToLocalStorage();
     renderTodos();
 }
 
@@ -70,15 +72,12 @@ function renderTodos() {
         if (todo.completed) li.classList.add('completed');
         
         li.innerHTML = `
-            <span onclick="toggleTodo(${todo.id})">${todo.text}</span>
+            <div onclick="toggleTodo(${todo.id})" style="flex:1;">
+                <strong>${todo.text}</strong><br>
+                <small style="color: #888;">Deadline: ${todo.date}</small>
+            </div>
             <button class="delete-btn" onclick="deleteTodo(${todo.id})">Hapus</button>
         `;
         listElement.appendChild(li);
     });
 }
-
-document.getElementById('todoInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-        addTodo();
-    }
-});

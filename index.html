@@ -39,6 +39,14 @@
             outline: none;
         }
 
+        input[type="date"] {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            color: #555;
+        }
+        
         input[type="text"]:focus { border-color: #007bff; }
 
         button.add-btn {
@@ -106,8 +114,8 @@
     <h2>My Tasks</h2>
 
     <div class="input-section">
-        <input type="text" id="todoInput" placeholder="Apa rencanamu hari ini?">
-        <button class="add-btn" onclick="addTodo()">Add</button>
+        <input type="text" id="todoInput" placeholder="Apa rencanamu?">
+        <input type="date" id="todoDate"> <button class="add-btn" onclick="addTodo()">Add</button>
     </div>
 
     <div class="filter-section">
